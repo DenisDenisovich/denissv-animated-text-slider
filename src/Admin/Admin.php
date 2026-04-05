@@ -1,0 +1,57 @@
+<?php
+
+namespace Denissv\AnimatedTextSlider\Admin;
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class Admin {
+    private static $instance = null;
+
+    public static $carousel3_pages = [
+        'edit-denissv-animated-text-slider',
+        'denissv-animated-text-slider',
+        'denissv-animated-text-slider_slides',
+    ];
+
+    public static $allowed_hooks = [
+        'post.php', 
+        'edit.php'
+    ];
+
+    private function __construct() {
+        error_log('Denissv Animated Text Slider Admin class initialized successfully.');
+        $this->init_hooks();
+    }
+
+    public static function get_instance() {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    private function init_hooks() {
+        Carousels::get_instance();
+        Sliders::get_instance();
+
+        // Подключение Js и CSS для админки только в плагине
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
+    }
+
+    public function enqueue_admin_assets($hook) {
+        $screen = get_current_screen();
+        if (empty($hook) || !in_array($hook, self::$allowed_hooks) || empty($screen) || !in_array($screen->id, self::$carousel3_pages)) {
+            return;
+        }
+
+        wp_enqueue_style(DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_NAME . '-css-admin', DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_URL . 'admin/css/admin.css', array(), DENISSV_ANIMATED_TEXT_SLIDER_VERSION);
+
+        wp_enqueue_script(DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_NAME . '-js-admin', DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_URL . 'admin/js/admin.js', array('jquery'), DENISSV_ANIMATED_TEXT_SLIDER_VERSION, true);
+        wp_localize_script(DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_NAME . '-js-admin', 'carousel3TableSort', [
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'nonce'   => wp_create_nonce('carousel3_sort_slides_nonce'),
+        ]);
+    }
+}
