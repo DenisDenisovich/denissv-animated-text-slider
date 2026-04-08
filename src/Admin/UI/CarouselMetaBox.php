@@ -8,6 +8,11 @@ if (!defined('ABSPATH')) {
 use Denissv\AnimatedTextSlider\Core\Hookable;
 use Denissv\AnimatedTextSlider\Core\Loader;
 use Denissv\AnimatedTextSlider\Domain\Carousel\CarouselMeta;
+use Denissv\AnimatedTextSlider\Admin\UI\Helpers\AdminUrl;
+use Denissv\AnimatedTextSlider\Domain\Carousel\CarouselRepository;
+use Denissv\AnimatedTextSlider\Domain\Carousel\CarouselService;
+use Denissv\AnimatedTextSlider\Domain\Slide\SlideMeta;
+use Denissv\AnimatedTextSlider\Domain\Slide\SlideRepository;
 
 class CarouselMetaBox implements Hookable {
 
@@ -37,8 +42,10 @@ class CarouselMetaBox implements Hookable {
     }
 
     public function render_slides_list($post): void {
-        $meta = new CarouselMeta();
-        $dsvats_data = $meta->get($post->ID);
+
+        $dsvats_data = (new CarouselRepository())->getById($post->ID);
+
+        $newSlideUrl = AdminUrl::newSlide($post->ID);
 
         include DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_DIR . 'src/Admin/UI/Views/carousel-table.php';
     }

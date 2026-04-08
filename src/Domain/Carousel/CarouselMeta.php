@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
 
 class CarouselMeta {
 
-    private const MENU_CAROUSEL_SLUG = 'dsv_carousel';
+    public const MENU_CAROUSEL_SLUG = 'dsv_carousel';
 
     public const FIELD_AUTOPLAY = '_dsvats_autoplay';
     public const FIELD_SPEED    = '_dsvats_speed';
@@ -25,7 +25,7 @@ class CarouselMeta {
             self::FIELD_LOOP     => 1,
             self::SHOW_ARROWS => 1,
             self::SHOW_DOTS => 1,
-            self::HEIGHT => 300,
+            self::HEIGHT => '300px',
             self::EFFECT => 'slide',
         ];
     }

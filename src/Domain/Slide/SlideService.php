@@ -6,7 +6,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class SlideRepository
-{
-    // Implementation for slide repository
+class SlideService {
+    // Implementation for slide service
 }

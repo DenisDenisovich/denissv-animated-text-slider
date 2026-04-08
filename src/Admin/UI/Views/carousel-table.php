@@ -8,8 +8,8 @@ if (!defined('ABSPATH')) {
     <thead><tr><th>Заголовок</th><th>Порядок</th><th>Действия</th><th></th></tr></thead>
         <tbody id="carousel3-sortable">
 
-        <?php if ($dsvats_data['slides']): ?>
-            <?php foreach ($dsvats_data['slides'] as $slide): ?>
+        <?php if ($dsvats_data->slides): ?>
+            <?php foreach ($dsvats_data->slides as $slide): ?>
                 <tr data-id="<?php echo intval($slide->ID); ?>">
                     <td><?php echo esc_html($slide->post_title); ?></td>
                     <td><?php echo intval($slide->menu_order); ?></td>
@@ -28,6 +28,6 @@ if (!defined('ABSPATH')) {
 
         <p>
             <a class="button button-primary" href="
-            <?php echo esc_url($dsvats_data['new_slide_url']); ?>
+            <?php echo esc_url($newSlideUrl); ?>
             ">Добавить слайд</a>
         </p>;

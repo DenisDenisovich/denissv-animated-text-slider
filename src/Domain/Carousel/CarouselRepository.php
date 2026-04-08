@@ -5,16 +5,17 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class CarouselRepository {
+use Denissv\AnimatedTextSlider\Domain\Carousel\CarouselService;
+use Denissv\AnimatedTextSlider\Domain\Slide\SlideRepository;
+use Denissv\AnimatedTextSlider\Infrastructure\Sanitizer;
 
-    public function __construct() {
-        $this->meta = $meta;
-    }
+class CarouselRepository {
+    private $carouselService;
 
     /**
      * Get one carousel by ID
      */
-    public function getById(int $id): ?array {
+    public function getById(int $id): ?CarouselDto {
         $post = get_post($id);
 
         if (!$post || $post->post_type !== CarouselPostType::POST_TYPE) {
@@ -24,24 +25,7 @@ class CarouselRepository {
         return $this->map($post);
     }
 
-    /**
-     * Get all carousels
-     */
-    public function getAll(): array {
-        $query = new \WP_Query([
-            'post_type'      => CarouselPostType::POST_TYPE,
-            'posts_per_page' => -1,
-            'post_status'    => 'publish',
-        ]);
-
-        $result = [];
-
-        foreach ($query->posts as $post) {
-            $result[] = $this->map($post);
-        }
-
-        return $result;
-    }
+  
 
     /**
      * Create new carousel
@@ -97,35 +81,28 @@ class CarouselRepository {
     /**
      * Map WP_Post to array (DTO)
      */
-    private function map(\WP_Post $post): array {
+    private function map(\WP_Post $post): CarouselDto {
         $defaults = CarouselMeta::getDefaults();
 
-        $new_slide_url = 
-            add_query_arg(
-                array(
-                    'post_type' => 'dsv_carousel_slide',
-                    'parent'    => $post->ID,
-                ),
-                admin_url( 'post-new.php' )
-            );
+        $slides = $this->carouselService->getSlidesByCarouselId($post->ID);
 
-        $slides = get_children([
-            'post_parent' => $post->ID,
-            'post_type' => 'dsv_carousel_slide',
-            'orderby' => 'menu_order',
-            'order' => 'ASC',
-        ]);
-
-        return [
-            'autoplay' => (int) get_post_meta($post->ID, self::FIELD_AUTOPLAY, true) ?: $defaults[self::FIELD_AUTOPLAY],
-            'speed'    => (int) get_post_meta($post->ID, self::FIELD_SPEED, true) ?: $defaults[self::FIELD_SPEED],
-            'loop'     => (int) get_post_meta($post->ID, self::FIELD_LOOP, true) ?: $defaults[self::FIELD_LOOP],
-            'show_arrows' => (int) get_post_meta($post->ID, self::SHOW_ARROWS, true) ?: $defaults[self::SHOW_ARROWS],
-            'show_dots' => (int) get_post_meta($post->ID, self::SHOW_DOTS, true) ?: $defaults[self::SHOW_DOTS],
-            'height' => (int) get_post_meta($post->ID, self::HEIGHT, true) ?: $defaults[self::HEIGHT],
-            'effect' => get_post_meta($post->ID, self::EFFECT, true) ?: $defaults[self::EFFECT],
-            'new_slide_url' => $new_slide_url,
-            'slides' => $slides,
-        ];
+        return new CarouselDto(
+            id: $post->ID,
+            autoplay: (int) get_post_meta($post->ID, CarouselMeta::FIELD_AUTOPLAY, true) ?: $defaults[CarouselMeta::FIELD_AUTOPLAY],
+            speed: (int) get_post_meta($post->ID, CarouselMeta::FIELD_SPEED, true) ?: $defaults[CarouselMeta::FIELD_SPEED],
+            loop: (int) get_post_meta($post->ID, CarouselMeta::FIELD_LOOP, true) ?: $defaults[CarouselMeta::FIELD_LOOP],
+            showArrows: (int) get_post_meta($post->ID, CarouselMeta::SHOW_ARROWS, true) ?: $defaults[CarouselMeta::SHOW_ARROWS],
+            showDots: (int) get_post_meta($post->ID, CarouselMeta::SHOW_DOTS, true) ?: $defaults[CarouselMeta::SHOW_DOTS],
+            height: (string) get_post_meta($post->ID, CarouselMeta::HEIGHT, true) ?: $defaults[CarouselMeta::HEIGHT],
+            effect: (string) get_post_meta($post->ID, CarouselMeta::EFFECT, true) ?: $defaults[CarouselMeta::EFFECT],
+            slides: $slides ? array_map(function($slide) {
+                return [
+                    'id' => $slide->ID,
+                    'title' => $slide->post_title,
+                    'content' => $slide->post_content,
+                    'menu_order' => $slide->menu_order,
+                ];
+            }, $slides) : [],
+        );
     }
 }
