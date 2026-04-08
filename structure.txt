@@ -1,0 +1,226 @@
+🧠 Core (ядро плагина)
+Plugin.php
+
+Роль: композиционный корень (entry point логики)
+Отвечает за:
+
+инициализацию всех компонентов
+сборку зависимостей (DI вручную)
+регистрацию через Loader
+
+По сути: единственное место, где “знают обо всех”
+
+Loader.php
+
+Роль: централизованный регистратор хуков
+Отвечает за:
+
+add_action
+add_filter
+возможно хранение массива хуков и их регистрация
+
+Важно:
+не содержит бизнес-логики — только связывает WP ↔ классы
+
+Hookable.php
+
+Роль: контракт (interface/trait)
+Отвечает за:
+
+единый метод типа register(Loader $loader)
+
+Зачем:
+чтобы любой класс мог “подписаться” на хуки одинаково
+
+🧩 Domain (бизнес-логика)
+
+Это самая важная часть — она должна быть максимально независима от WP.
+
+Carousel
+CarouselPostType.php
+
+Роль: регистрация CPT
+Отвечает за:
+
+register_post_type
+labels, supports и т.д.
+
+❗ НЕ должен:
+
+работать с мета
+делать запросы
+CarouselMeta.php
+
+Роль: описание мета-полей
+Отвечает за:
+
+ключи meta (_carousel_speed, etc.)
+дефолты
+(иногда) регистрацию через register_post_meta
+CarouselRepository.php
+
+Роль: слой доступа к данным
+Отвечает за:
+
+получение каруселей (getById, getAll)
+работу с WP_Query
+чтение/запись meta
+
+Это твой mini-ORM поверх WP
+
+Slide
+
+Аналогично Carousel:
+
+SlidePostType.php
+
+→ регистрация CPT slide
+
+SlideMeta.php
+
+→ описание meta полей слайда
+
+SlideRepository.php
+
+→ работа с данными слайдов
+
+🎛 Admin (админка)
+Ajax
+UpdateSlideOrder.php
+
+Роль: AJAX endpoint
+Отвечает за:
+
+обработку wp_ajax_*
+проверку nonce
+вызов Repository для обновления порядка
+
+❗ НЕ должен:
+
+напрямую работать с БД
+содержать HTML
+UI / MetaBox
+CarouselMetaBox.php
+
+Роль: метабокс карусели
+Отвечает за:
+
+добавление add_meta_box
+сохранение данных (save_post)
+подключение view
+SlideMetaBox.php
+
+То же самое, но для слайдов
+
+Views (Admin)
+carousel-settings.php
+carousel-table.php
+slide-settings.php
+
+Роль: только шаблоны
+Отвечают за:
+
+HTML разметку
+вывод данных
+
+❗ НЕ должны:
+
+делать запросы
+содержать бизнес-логику
+🌐 Frontend
+Renderer
+CarouselRenderer.php
+
+Роль: подготовка данных для вывода
+Отвечает за:
+
+получение данных через Repository
+сбор DTO/массива для шаблона
+выбор view
+Shortcode
+CarouselShortcode.php
+
+Роль: интеграция с WP shortcode API
+Отвечает за:
+
+add_shortcode
+парсинг атрибутов
+вызов Renderer
+Views
+carousel.php
+
+Роль: HTML фронтенда
+Отвечает за:
+
+разметку слайдера
+вывод данных
+
+❗ никакой логики, максимум foreach
+
+🔧 Infrastructure (технический слой)
+Assets.php
+
+Роль: управление ресурсами
+Отвечает за:
+
+wp_enqueue_script
+wp_enqueue_style
+разделение admin / frontend
+Nonce.php
+
+Роль: безопасность
+Отвечает за:
+
+создание nonce
+проверку (wp_verify_nonce)
+Sanitizer.php
+
+Роль: очистка данных
+Отвечает за:
+
+sanitize_text_field
+кастомные методы очистки
+📦 assets
+assets/
+├── admin
+└── frontend
+
+Роль: статические файлы
+Важно:
+
+не содержат PHP
+подключаются через Assets.php
+🖼 images
+
+Статика (иконки, превью и т.д.)
+
+⚙️ entry point
+DENISSV-ANIMATED-SLIDER.php
+
+Роль: точка входа плагина
+Отвечает за:
+
+подключение autoload
+создание Plugin
+вызов run()
+💡 Важная архитектурная мысль
+
+У тебя сейчас четкое разделение:
+
+Слой	Зависимости
+Core	знает обо всех
+Domain	не знает о WP
+Admin	зависит от Domain
+Frontend	зависит от Domain
+Infrastructure	сервисы
+⚠️ Где чаще всего делают ошибки
+Repository начинает рендерить HTML ❌
+Views делают WP_Query ❌
+MetaBox содержит бизнес-логику ❌
+Loader превращается в “god object” ❌
+✔️ Итог
+
+Ты построил архитектуру уровня:
+
+не “обычный WP плагин”
+а почти DDD-lite / Clean Architecture
