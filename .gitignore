@@ -1,0 +1,14 @@
+# System files and IDE cache
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+
+# COMPOSER UTILITY FILES
+# Do NOT ignore the vendor folder (it is required for WP.org)
+composer.phar
+.phpunit.result.cache
+
+# Temporary WordPress files
+wp-cli.local.yml

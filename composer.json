@@ -1,0 +1,17 @@
+{
+    "name": "denissv/denissv-animated-text-slider",
+    "description": "A plugin for creating a carousel with animated text",
+    "type": "project",
+    "license": "GPL-2.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "Denissv\\AnimatedTextSlider\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Denis Sviridovskiy"
+        }
+    ],
+    "require": {}
+}

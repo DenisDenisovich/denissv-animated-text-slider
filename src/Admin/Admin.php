@@ -10,9 +10,9 @@ class Admin {
     private static $instance = null;
 
     public static $carousel3_pages = [
-        'edit-denissv-animated-text-slider',
-        'denissv-animated-text-slider',
-        'denissv-animated-text-slider_slides',
+        'edit-' . DENISSV_ANIMATED_TEXT_SLIDER_MENU_SLUG,
+        DENISSV_ANIMATED_TEXT_SLIDER_MENU_SLUG,
+        DENISSV_ANIMATED_TEXT_SLIDER_MENU_SLUG . '_slides',
     ];
 
     public static $allowed_hooks = [
@@ -21,7 +21,6 @@ class Admin {
     ];
 
     private function __construct() {
-        error_log('Denissv Animated Text Slider Admin class initialized successfully.');
         $this->init_hooks();
     }
 
@@ -41,17 +40,20 @@ class Admin {
     }
 
     public function enqueue_admin_assets($hook) {
+        error_log('Admin enqueue scripts hook: ' . $hook); // Debug log
         $screen = get_current_screen();
+        error_log('Current admin screen: ' . ($screen ? $screen->id : 'unknown')); // Debug log
         if (empty($hook) || !in_array($hook, self::$allowed_hooks) || empty($screen) || !in_array($screen->id, self::$carousel3_pages)) {
             return;
         }
+        error_log(DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_URL . 'assets/admin/css/admin.css'); // Debug log
 
-        wp_enqueue_style(DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_NAME . '-css-admin', DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_URL . 'admin/css/admin.css', array(), DENISSV_ANIMATED_TEXT_SLIDER_VERSION);
+        wp_enqueue_style(DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_NAME . '-css-admin', DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_URL . 'assets/admin/css/admin.css', array(), DENISSV_ANIMATED_TEXT_SLIDER_VERSION);
 
-        wp_enqueue_script(DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_NAME . '-js-admin', DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_URL . 'admin/js/admin.js', array('jquery'), DENISSV_ANIMATED_TEXT_SLIDER_VERSION, true);
+        wp_enqueue_script(DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_NAME . '-js-admin', DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_URL . 'assets/admin/js/admin.js', array('jquery'), DENISSV_ANIMATED_TEXT_SLIDER_VERSION, true);
         wp_localize_script(DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_NAME . '-js-admin', 'carousel3TableSort', [
             'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce'   => wp_create_nonce('carousel3_sort_slides_nonce'),
+            'nonce'   => wp_create_nonce('denissv_animated_text_slider_sort_slides_nonce'),
         ]);
     }
 }

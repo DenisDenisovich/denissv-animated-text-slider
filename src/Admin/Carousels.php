@@ -6,18 +6,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-/**
- * Класс Carousels
- * 
- * Класс складывает методы исключетельно для страницы карусели в админке(id carousel3 но это не точно).
- * Страница карусели в админке показывает список слайдов и общие настройки карусели.
- * Не очень хорошая практика ООП
- * 
- * @author Денис
- */
 class Carousels {
     private const MENU_CAROUSEL_SLUG = 'dsv_carousel';
-    private const POST_TYPE_SLIDE = DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_NAME . '_slides';
+    private const POST_TYPE_SLIDE = self::MENU_CAROUSEL_SLUG . '_slides';
     private static $instance = null;
 
     public static function get_instance() {
@@ -41,7 +32,7 @@ class Carousels {
         add_action('add_meta_boxes', array($this, 'add_meta_boxes'));
 
         // Сохранение данных
-        add_action('save_post_' . DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_NAME, array($this, 'save_carousel_data'), 10, 2);
+        add_action('save_post', array($this, 'save_carousel_data'), 10, 2);
     }
     
     public function create_menu_carousel() {
@@ -122,11 +113,11 @@ class Carousels {
     public function menu_carousel() {
         register_post_type(self::MENU_CAROUSEL_SLUG, [
             'labels' => [
-                'name' => 'Карусели3',
-                'singular_name' => 'Карусель3',
+                'name' => 'DSV Карусели',
+                'singular_name' => 'DSV Карусель',
                 'add_new' => 'Добавить новую',
-                'add_new_item' => 'Создание новой карусели3',
-                'edit_item' => 'Редактирование карусели3',
+                'add_new_item' => 'Создание новой карусели',
+                'edit_item' => 'Редактирование карусели',
             ],
             'public' => false,
             'show_ui' => true,
@@ -144,7 +135,7 @@ class Carousels {
             'carousel_slides_meta_box',
             'Слайды карусели',
             array($this, 'render_carousel_slides'),
-            MENU_CAROUSEL_SLUG,
+            self::MENU_CAROUSEL_SLUG,
             'normal',
             'high'
         );
@@ -153,7 +144,7 @@ class Carousels {
             DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_KEY . '_settings',
             __('Настройки карусели', 'denissv-animated-text-slider'),
             array($this, 'render_settings_metabox'),
-            MENU_CAROUSEL_SLUG,
+            self::MENU_CAROUSEL_SLUG,
             'side',
             'default'
         );
@@ -163,7 +154,7 @@ class Carousels {
         wp_nonce_field('denissv_animated_text_slider_save_data', 'denissv_animated_text_slider_nonce');
         $shortcode = '';
         if (isset($post) && isset($post->ID) && $post->ID) {
-            $shortcode = sprintf('[%s id="%d"]', DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_NAME, (int) $post->ID);
+            $shortcode = sprintf('[%s id="%d"]', DENISSV_ANIMATED_TEXT_SLIDER_SHORTCODE, (int) $post->ID);
         }
 
         $carousel_id = $post->ID;
@@ -178,7 +169,7 @@ class Carousels {
         $height = $height ? $height : 'none';
         $effect = $effect ? $effect : 'slide';
 
-        include DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_DIR . 'admin/views/carousel-metabox-settings.php';
+        include DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_DIR . 'src/Admin/Views/metaboxes/carousel-metabox-settings.php';
     }
 
     public function save_carousel_data($post_id, $post) {

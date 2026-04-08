@@ -7,7 +7,8 @@ if (!defined('ABSPATH')) {
 }
 
 class Sliders {
-    private const POST_TYPE_SLIDE = DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_NAME . '_slides';
+    private const MENU_CAROUSEL_SLUG = 'dsv_carousel';
+    private const MENU_SLIDER_SLUG = self::MENU_CAROUSEL_SLUG . '_slides';
 
     private static $instance = null;
 
@@ -31,7 +32,7 @@ class Sliders {
         add_action('add_meta_boxes', array($this, 'add_meta_boxes'));
 
         // Сохранение данных
-        add_action('save_post_' . self::POST_TYPE_SLIDE, array($this,'save_slide_data'), 10, 2);
+        add_action('save_post_' . self::MENU_SLIDER_SLUG, array($this,'save_slide_data'), 10, 2);
 
         // Отчаяние
         add_action('edit_form_top', [$this, 'render_back_button']);
@@ -39,7 +40,7 @@ class Sliders {
 
     public function render_back_button($post) {
         // Проверяем тип поста
-        if ($post->post_type !== self::POST_TYPE_SLIDE) {
+        if ($post->post_type !== self::MENU_SLIDER_SLUG) {
             return;
         }
 
@@ -60,7 +61,7 @@ class Sliders {
     }
 
     public function create_menu_slides() {
-        register_post_type(self::POST_TYPE_SLIDE, [
+        register_post_type(self::MENU_SLIDER_SLUG, [
             'labels' => [
                 'name' => 'Слайды',
                 'singular_name' => 'Слайд',
@@ -82,7 +83,7 @@ class Sliders {
             DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_NAME . '_slide_settings',
             __('Настройки слайда', 'denissv-animated-text-slider'),
             array($this, 'render_slide_settings_meta_box'),
-            self::POST_TYPE_SLIDE,
+            self::MENU_SLIDER_SLUG,
             'side',
             'default'
         );
@@ -119,7 +120,7 @@ class Sliders {
             'animate__rollIn'               => __('Roll In', 'denissv-animated-text-slider'),
         ];
 
-        require_once DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_DIR . 'admin/views/slide-metabox-settings.php';
+        require_once DENISSV_ANIMATED_TEXT_SLIDER_PLUGIN_DIR . 'src/Admin/Views/metaboxes/slide-metabox-settings.php';
     }
 
     public function save_slide_data($post_id, $post) {
@@ -153,7 +154,7 @@ class Sliders {
     }
 
     public function render_parent_hidden_field($post) {
-        if ($post->post_type !== self::POST_TYPE_SLIDE) {
+        if ($post->post_type !== self::MENU_SLIDER_SLUG) {
             return;
         }
 
@@ -175,7 +176,7 @@ class Sliders {
     }
 
     public function set_parent_for_slide_on_save($data, $postarr) {
-        if (!isset($data['post_type']) || $data['post_type'] !== self::POST_TYPE_SLIDE) {
+        if (!isset($data['post_type']) || $data['post_type'] !== self::MENU_SLIDER_SLUG) {
             return $data;
         }
 
